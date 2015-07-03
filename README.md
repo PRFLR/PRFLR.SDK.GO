@@ -3,10 +3,13 @@ SDK library for Go Lang
 
 Installation:
 
+```
 $ go get github.com/PRFLR/PRFLR.SDK.GO/PRFLR
+```
 
 Usage:
 
+```go
 package main
 
 import(
@@ -29,5 +32,6 @@ func main() {
 		  timer.End("Step:"+strconv.Itoa(i))
 	}
 }
+```
 	
 Read more about PRFLR service at: http://prflr.org/
