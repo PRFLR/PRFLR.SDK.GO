@@ -2,6 +2,7 @@ package PRFLR
 
 import (
 	"net/url"
+	"errors"
 	"fmt"
 	"net"
 	"time"
@@ -12,8 +13,8 @@ type Timer struct {
 	start  time.Time
 }
 
-var host string
-var key string
+var host   string
+var key    string
 var source string
 
 func New(timer string) *Timer {
@@ -32,7 +33,7 @@ func (p *Timer) End(info string) {
 
 	conn, err := getConnection()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("PRFLR Error occured: ", err)
 		return
 	}
 	defer conn.Close()
@@ -41,7 +42,7 @@ func (p *Timer) End(info string) {
 
 	_, err = conn.Write([]byte(data))
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("PRFLR Error occured: ", err)
 	}
 }
 
@@ -52,6 +53,10 @@ func millisecond(d time.Duration) float64 {
 }
 
 func getConnection() (*net.UDPConn, error) {
+	if len(host) == 0 {
+		return nil, errors.New("PRFLR Host is not specified. Please call PRFLR.Init() BEFORE sending timers!")
+	}
+
 	serverAddr, err  := net.ResolveUDPAddr("udp", host)
 	if err != nil {
 		return nil, err
