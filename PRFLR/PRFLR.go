@@ -38,7 +38,7 @@ func (p *Timer) End(info string) {
 	}
 	defer conn.Close()
 
-	data := fmt.Sprintf("%.32s|%.32s|%.48s|%s|%.32s|%.32s\n", "GO_LANG_THREAD", source, p.Timer, dur, info, key)
+	data := fmt.Sprintf("%.32s|%.32s|%.48s|%s|%.32s|%.32s\n", "0", source, p.Timer, dur, info, key)
 
 	_, err = conn.Write([]byte(data))
 	if err != nil {
