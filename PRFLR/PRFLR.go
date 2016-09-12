@@ -23,18 +23,18 @@ func New(timer string) *Timer {
 		start:  time.Now(),
 	}
 }
-func Init(dsn, src string) {
-	key, host = parseDSN(dsn)
+func Init(dsn, src string) error{
+	key, host, err = parseDSN(dsn)
 	source = src
+	return err
 }
 
-func (p *Timer) End(info string) {
+func (p *Timer) End(info string) error {
 	dur := fmt.Sprintf("%.3f", millisecond(time.Since(p.start)))
-
+	
 	conn, err := getConnection()
 	if err != nil {
-		fmt.Println("PRFLR Error occured: ", err)
-		return
+		return err
 	}
 	defer conn.Close()
 
@@ -42,8 +42,9 @@ func (p *Timer) End(info string) {
 
 	_, err = conn.Write([]byte(data))
 	if err != nil {
-		fmt.Println("PRFLR Error occured: ", err)
+		return err
 	}
+	return nil
 }
 
 func millisecond(d time.Duration) float64 {
@@ -53,8 +54,8 @@ func millisecond(d time.Duration) float64 {
 }
 
 func getConnection() (*net.UDPConn, error) {
-	if len(host) == 0 {
-		return nil, errors.New("PRFLR Host is not specified. Please call PRFLR.Init() BEFORE sending timers!")
+	if len(host) == 0 || len(key) == 0 {
+		return nil, errors.New("PRFLR Host/Key is not specified. Please call PRFLR.Init() BEFORE sending timers!")
 	}
 
 	serverAddr, err  := net.ResolveUDPAddr("udp", host)
@@ -65,11 +66,11 @@ func getConnection() (*net.UDPConn, error) {
 	return net.DialUDP("udp", nil, serverAddr)
 }
 
-func parseDSN(dsn string) (key, host string) {
-	d, err := url.Parse(dsn)
+func parseDSN(dsn string) (key, host string, err error) {
+    d, err := url.Parse(dsn)
     if err != nil || d.User == nil || len(d.Host) == 0 {
-        panic("Cannot parse PRFLR DSN")
+        return errors.New("Cannot parse PRFLR DSN")
     }
 
-    return d.User.Username(), d.Host
+    return d.User.Username(), d.Host, nil
 }
