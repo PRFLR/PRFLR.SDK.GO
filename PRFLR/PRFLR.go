@@ -23,10 +23,10 @@ func New(timer string) *Timer {
 		start:  time.Now(),
 	}
 }
-func Init(dsn, src string) error{
+func Init(dsn, src string) (err error) {
 	key, host, err = parseDSN(dsn)
 	source = src
-	return err
+	return
 }
 
 func (p *Timer) End(info string) error {
@@ -69,7 +69,7 @@ func getConnection() (*net.UDPConn, error) {
 func parseDSN(dsn string) (key, host string, err error) {
     d, err := url.Parse(dsn)
     if err != nil || d.User == nil || len(d.Host) == 0 {
-        return errors.New("Cannot parse PRFLR DSN")
+        return "", "", errors.New("Cannot parse PRFLR DSN")
     }
 
     return d.User.Username(), d.Host, nil
