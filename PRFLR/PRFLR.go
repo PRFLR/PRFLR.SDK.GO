@@ -16,7 +16,7 @@ type Timer struct {
 var host   string
 var key    string
 var source string
-var ip     *net.UDPAddr = nil
+var conn   *net.UDPConn 
 
 func New(timer string) *Timer {
 	return &Timer{
@@ -27,20 +27,13 @@ func New(timer string) *Timer {
 func Init(dsn, src string) (err error) {
 	key, host, err = parseDSN(dsn)
 	source = src
+	conn, err := getConnection()
 	return
 }
 
 func (p *Timer) End(info string) error {
 	dur := fmt.Sprintf("%.3f", millisecond(time.Since(p.start)))
-	
-	conn, err := getConnection()
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
 	data := fmt.Sprintf("%.32s|%.32s|%.48s|%s|%.32s|%.32s\n", "0", source, p.Timer, dur, info, key)
-
 	_, err = conn.Write([]byte(data))
 	if err != nil {
 		return err
