@@ -27,18 +27,15 @@ func New(timer string) *Timer {
 func Init(dsn, src string) (err error) {
 	key, host, err = parseDSN(dsn)
 	source = src
-	conn, err := getConnection()
+	conn, err = getConnection()
 	return
 }
 
 func (p *Timer) End(info string) error {
 	dur := fmt.Sprintf("%.3f", millisecond(time.Since(p.start)))
 	data := fmt.Sprintf("%.32s|%.32s|%.48s|%s|%.32s|%.32s\n", "0", source, p.Timer, dur, info, key)
-	_, err = conn.Write([]byte(data))
-	if err != nil {
-		return err
-	}
-	return nil
+	_, err := conn.Write([]byte(data))
+	return err
 }
 
 func millisecond(d time.Duration) float64 {
@@ -52,12 +49,9 @@ func getConnection() (*net.UDPConn, error) {
 		return nil, errors.New("PRFLR Host/Key is not specified. Please call PRFLR.Init() BEFORE sending timers!")
 	}
 
-	if ip==nil {
-		var err error 
-		ip, err  = net.ResolveUDPAddr("udp", host)
-		if err != nil {
-			return nil, err
-		}
+	ip, err  := net.ResolveUDPAddr("udp", host)
+	if err != nil {
+		return nil, err
 	}
 	
 	return net.DialUDP("udp", nil, ip), nil
