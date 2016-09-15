@@ -16,7 +16,7 @@ type Timer struct {
 var host   string
 var key    string
 var source string
-var ip string
+var ip     *net.UDPAddr
 
 func New(timer string) *Timer {
 	return &Timer{
