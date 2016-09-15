@@ -16,6 +16,7 @@ type Timer struct {
 var host   string
 var key    string
 var source string
+var ip string
 
 func New(timer string) *Timer {
 	return &Timer{
@@ -58,12 +59,15 @@ func getConnection() (*net.UDPConn, error) {
 		return nil, errors.New("PRFLR Host/Key is not specified. Please call PRFLR.Init() BEFORE sending timers!")
 	}
 
-	serverAddr, err  := net.ResolveUDPAddr("udp", host)
-	if err != nil {
-		return nil, err
+	if ip=="" {
+		var err error 
+		ip, err  = net.ResolveUDPAddr("udp", host)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	return net.DialUDP("udp", nil, serverAddr)
+	
+	return net.DialUDP("udp", nil, ip), nil
 }
 
 func parseDSN(dsn string) (key, host string, err error) {
