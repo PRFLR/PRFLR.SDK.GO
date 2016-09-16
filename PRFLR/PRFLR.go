@@ -49,12 +49,12 @@ func getConnection() (*net.UDPConn, error) {
 		return nil, errors.New("PRFLR Host/Key is not specified. Please call PRFLR.Init() BEFORE sending timers!")
 	}
 
-	ip, err  := net.ResolveUDPAddr("udp", host)
+	serverAddr, err  := net.ResolveUDPAddr("udp", host)
 	if err != nil {
 		return nil, err
 	}
-	
-	return net.DialUDP("udp", nil, ip), nil
+
+	return net.DialUDP("udp", nil, serverAddr)
 }
 
 func parseDSN(dsn string) (key, host string, err error) {
