@@ -32,6 +32,9 @@ func Init(dsn, src string) (err error) {
 }
 
 func (p *Timer) End(info string) error {
+	if len(host) == 0 || len(key) == 0 {
+		return errors.New("PRFLR Host/Key is not specified. Please call PRFLR.Init() BEFORE sending timers!")
+	}
 	dur := fmt.Sprintf("%.3f", millisecond(time.Since(p.start)))
 	data := fmt.Sprintf("%.32s|%.32s|%.48s|%s|%.32s|%.32s\n", "0", source, p.Timer, dur, info, key)
 	_, err := conn.Write([]byte(data))
@@ -51,6 +54,8 @@ func getConnection() (*net.UDPConn, error) {
 
 	serverAddr, err  := net.ResolveUDPAddr("udp", host)
 	if err != nil {
+		host = ""
+		key = ""
 		return nil, err
 	}
 
