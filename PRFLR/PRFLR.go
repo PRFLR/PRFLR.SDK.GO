@@ -1,40 +1,40 @@
 package PRFLR
 
 import (
-	"net/url"
 	"errors"
 	"fmt"
 	"net"
+	"net/url"
 	"time"
 )
 
 type Timer struct {
-	Timer  string
-	start  time.Time
+	Timer string
+	start time.Time
 }
 
-var conn   	*net.UDPConn 
-var key 	string
+var conn *net.UDPConn
+var key, source string
 
 func Init(dsn, src string) error {
-	key, host, err = parseDSN(dsn)
 	d, err := url.Parse(dsn)
-    	if err != nil || d.User.Username() == nil || len(d.Host) == 0 {
-        	return errors.New("Cannot parse PRFLR DSN")
-    	}
-	server, err2 := net.ResolveUDPAddr("udp", d.Host)
+	if err != nil || d.User == nil || len(d.Host) == 0 {
+		return errors.New("Cannot parse PRFLR DSN")
+	}
+	serverIP, err2 := net.ResolveUDPAddr("udp", d.Host)
 	if err2 != nil {
 		return err2
 	}
 	key = d.User.Username()
-	conn = net.DialUDP("udp", nil, server)
+	source = src
+	conn, _ = net.DialUDP("udp", nil, serverIP)
 	return nil
 }
 
 func New(timer string) *Timer {
 	return &Timer{
-		Timer:  timer,
-		start:  time.Now(),
+		Timer: timer,
+		start: time.Now(),
 	}
 }
 
@@ -49,16 +49,5 @@ func (p *Timer) End(info string) error {
 }
 
 func millisecond(d time.Duration) float64 {
-	return float64( d/time.Millisecond ) + float64( d%time.Millisecond )*1e-9
-}
-
-func getConnection() (*net.UDPConn, error) {
-	if len(host) == 0 || len(key) == 0 {
-		return nil, errors.New("PRFLR Host/Key is not specified. Please call PRFLR.Init() BEFORE sending timers!")
-	}
-	serverAddr, err  := net.ResolveUDPAddr("udp", host)
-	if err != nil {
-		return nil, err
-	}
-	return net.DialUDP("udp", nil, serverAddr)
+	return float64(d/time.Millisecond) + float64(d%time.Millisecond)*1e-9
 }
